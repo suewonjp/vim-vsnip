@@ -14,6 +14,13 @@ function! vsnip#source#user_snippet#find(bufnr) abort
   return l:sources
 endfunction
 
+function! vsnip#source#user_snippet#update_cache(bufnr = '%') abort
+  let l:bufnr = bufnr(a:bufnr)
+  for l:path in s:get_source_paths(l:bufnr)
+    let s:cache[l:path] = vsnip#source#create(l:path)
+  endfor
+endfunction
+
 "
 " vsnip#source#user_snippet#refresh.
 "

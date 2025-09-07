@@ -1,2 +1,13 @@
 node_modules
 /doc/tags
+.swp
+.orig
+.env
+Session.vim
+_vimrc
+.exrc*
+.nvimrc
+.vimrc_prelude
+memo
+tmp
+tags
