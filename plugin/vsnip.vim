@@ -185,6 +185,51 @@ function! s:vsnip_set_text(type) abort
   return select
 endfunction
 
+if executable('fzf') && get(g:, 'vsnip_use_fzf_features', 0)
+  "
+  " <Plug>(vsnip-choose-snippet-via-fzf)
+  "
+  inoremap <Plug>(vsnip-choose-snippet-via-fzf) <C-o>:call <SID>vsnip_choose_snippet_via_fzf()<CR>
+  if ! maparg('<C-s>n', 'i')
+    imap <silent> <C-s>n <Plug>(vsnip-choose-snippet-via-fzf)
+  endif
+
+  function! s:vsnip_gather_availabel_snippets() abort
+    let output = []
+    let dirs = [expand('~/.vsnip')]
+    let dirs += exists('g:vsnip_snippet_dirs') ? g:vsnip_snippet_dirs : []
+    for dir in dirs
+      for file in split(glob($"{dir}/{&filetype}*.json"))
+        if ! filereadable(file) | continue | endif
+        let lines = readfile(file)
+        if empty(lines) | continue | endif
+        let snippets = json_decode(join(lines, "\n"))
+        for item in items(snippets)
+          let key = item[0]
+          let value = item[1]
+          call add(output, $"{value['prefix']};:;{key};:;{substitute(string(value['body']), '\n', '', 'g')};:;{file}")
+        endfor
+      endfor
+    endfor
+    return output
+  endfunction
+
+  function! s:vsnip_use_snippet_from_fzf(prefix)
+    let @s = a:prefix[0]
+    normal "sp==
+    call feedkeys("A\<C-j>")
+  endfunction
+
+  function! s:vsnip_choose_snippet_via_fzf() abort
+    call fzf#run({
+      \ 'source':  s:vsnip_gather_availabel_snippets(),
+      \ 'sink*':   function('s:vsnip_use_snippet_from_fzf'),
+      \ 'options': ['--no-multi', '--ansi', '--delimiter', ';:;', '--accept-nth', 1, '--preview', 'ag -F -A 10 --nonumbers --color \"{2} -- {-1}'],
+      \ 'down':    '50%'
+      \ })
+  endfunction
+endif
+
 "
 " augroup.
 "
