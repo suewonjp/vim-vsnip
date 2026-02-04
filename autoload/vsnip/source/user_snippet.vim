@@ -9,7 +9,7 @@ function! vsnip#source#user_snippet#find(bufnr) abort
     if !has_key(s:cache, l:path)
       let s:cache[l:path] = vsnip#source#create(l:path)
     endif
-    call add(l:sources, s:cache[l:path])
+    call insert(l:sources, s:cache[l:path], 0)
   endfor
   return l:sources
 endfunction
